@@ -10,7 +10,8 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
+    role: "user"
   });
   const [errors, setErrors] = useState({});
 
@@ -20,8 +21,7 @@ const LoginPage = () => {
       ...prev,
       [name]: value
     }));
-    
-    // Réinitialiser l'erreur pour ce champ
+
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -32,46 +32,50 @@ const LoginPage = () => {
 
   const validate = () => {
     const newErrors = {};
-    
+
     if (!formData.email) {
       newErrors.email = "L'email est requis";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Format d'email invalide";
     }
-    
+
     if (!formData.password) {
       newErrors.password = "Le mot de passe est requis";
     } else if (formData.password.length < 6) {
       newErrors.password = "Le mot de passe doit avoir au moins 6 caractères";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validate()) {
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
-      // Simulation d'authentification (à remplacer par un appel API réel)
       setTimeout(() => {
-        // Utilisateur fictif avec un rôle
         const userData = {
           id: "user123",
           email: formData.email,
-          username: formData.email.split('@')[0],
-          role: formData.email.includes("admin") ? "admin" : "user"
+          username: formData.email.split("@")[0],
+          role: formData.role // utilise le rôle choisi
         };
-        
+
         login(userData);
         console.log("Utilisateur connecté:", userData);
-        navigate("/");
+
+        // Redirection selon le rôle
+        if (formData.role === "admin") {
+          navigate("/admin-dashboard");
+        } else {
+          navigate("/");
+        }
       }, 1000);
     } catch (error) {
       console.error("Erreur de connexion:", error);
@@ -137,6 +141,21 @@ const LoginPage = () => {
               </button>
             </div>
             {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+          </div>
+
+          {/* Select pour rôle */}
+          <div>
+            <label htmlFor="role" className="block mb-1 font-medium">Rôle</label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
+            >
+              <option value="user">Utilisateur</option>
+              <option value="admin">Administrateur</option>
+            </select>
           </div>
 
           <button
