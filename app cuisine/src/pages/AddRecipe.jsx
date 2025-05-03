@@ -44,7 +44,6 @@ const AddRecipe = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation simple
     const newErrors = {};
     if (!formData.title) newErrors.title = "Le titre est requis";
     if (!formData.description) newErrors.description = "La description est requise";
@@ -56,7 +55,6 @@ const AddRecipe = () => {
       return;
     }
 
-    // Simulation d'envoi
     try {
       const newRecipe = {
         ...formData,
@@ -67,10 +65,8 @@ const AddRecipe = () => {
         comments: []
       };
 
-      // Ici vous devriez faire un appel API réel
       console.log("Nouvelle recette:", newRecipe);
 
-      // Après l'ajout, on redirige vers la page des recettes
       navigate(`/recipes`);
     } catch (error) {
       console.error("Erreur lors de l'ajout:", error);

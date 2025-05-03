@@ -4,7 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Recipes from "./pages/Recipes";
 import AddRecipe from "./pages/AddRecipe";
-import RecipeDetails from "./pages/RecipeDetails"; // ✅ بدّل هنا
+import RecipeDetails from "./pages/RecipeDetails";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtecteRoute";
