@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Eye, EyeOff, LogIn } from "lucide-react";
+import { Eye, EyeOff, LogIn, UserCog, User } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const LoginPage = () => {
@@ -8,195 +8,94 @@ const LoginPage = () => {
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    role: "user"
-  });
+  const [formData, setFormData] = useState({ email: "", password: "", role: "user" });
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: ""
-      }));
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
   };
 
   const validate = () => {
     const newErrors = {};
-
-    if (!formData.email) {
-      newErrors.email = "L'email est requis";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Format d'email invalide";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Le mot de passe est requis";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Le mot de passe doit avoir au moins 6 caractères";
-    }
-
+    if (!formData.email) newErrors.email = "L'email est requis";
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Format d'email invalide";
+    if (!formData.password) newErrors.password = "Le mot de passe est requis";
+    else if (formData.password.length < 6) newErrors.password = "Le mot de passe doit avoir au moins 6 caractères";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!validate()) {
-      return;
-    }
-
+    if (!validate()) return;
     setIsLoading(true);
 
-    try {
-      setTimeout(() => {
-        const userData = {
-          id: "user123",
-          email: formData.email,
-          username: formData.email.split("@")[0],
-          role: formData.role // utilise le rôle choisi
-        };
+    setTimeout(() => {
+      const userData = {
+        id: "user123",
+        email: formData.email,
+        username: formData.email.split("@")[0],
+        role: formData.role
+      };
 
-        login(userData);
-        console.log("Utilisateur connecté:", userData);
-
-        // Redirection selon le rôle
-        if (formData.role === "admin") {
-          navigate("/admin-dashboard");
-        } else {
-          navigate("/");
-        }
-      }, 1000);
-    } catch (error) {
-      console.error("Erreur de connexion:", error);
-      setErrors({
-        form: "Email ou mot de passe incorrect"
-      });
-    } finally {
+      login(userData);
+      navigate(formData.role === "admin" ? "/admin-dashboard" : "/");
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
   return (
     <div className="max-w-md mx-auto py-8">
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 md:p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold">Bienvenue</h1>
-          <p className="text-gray-600 dark:text-gray-400">Connectez-vous à votre compte</p>
-        </div>
+        <h1 className="text-2xl font-bold text-center mb-4">Bienvenue</h1>
 
-        {errors.form && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
-            <span className="block sm:inline">{errors.form}</span>
-          </div>
-        )}
+        {errors.form && <div className="bg-red-100 text-red-700 px-4 py-2 rounded">{errors.form}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block mb-1 font-medium">Email</label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700 ${
-                errors.email ? "border-red-500" : ""
-              }`}
-              placeholder="your@email.com"
-            />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            <label>Email</label>
+            <input name="email" value={formData.email} onChange={handleChange}
+              className={`w-full p-2 border rounded-md ${errors.email ? "border-red-500" : ""}`}
+              type="email" placeholder="email@example.com" />
+            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
           </div>
 
           <div>
-            <label htmlFor="password" className="block mb-1 font-medium">Mot de passe</label>
+            <label>Mot de passe</label>
             <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className={`w-full p-2 border rounded-md pr-10 dark:bg-gray-800 dark:border-gray-700 ${
-                  errors.password ? "border-red-500" : ""
-                }`}
-                placeholder="••••••••"
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                onClick={() => setShowPassword(!showPassword)}
-              >
+              <input name="password" value={formData.password} onChange={handleChange}
+                className={`w-full p-2 border rounded-md ${errors.password ? "border-red-500" : ""}`}
+                type={showPassword ? "text" : "password"} placeholder="••••••••" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-2 text-gray-500">
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+            {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
           </div>
 
-          {/* Select pour rôle */}
-          <div>
-            <label htmlFor="role" className="block mb-1 font-medium">Rôle</label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
-            >
-              <option value="user">Utilisateur</option>
-              <option value="admin">Administrateur</option>
-            </select>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setFormData(prev => ({ ...prev, role: "user" }))}
+              className={`p-2 border rounded-md flex-1 ${formData.role === "user" ? "bg-rose-100" : ""}`}>
+              <User className="inline mr-1" size={16} /> Utilisateur
+            </button>
+            <button type="button" onClick={() => setFormData(prev => ({ ...prev, role: "admin" }))}
+              className={`p-2 border rounded-md flex-1 ${formData.role === "admin" ? "bg-rose-100" : ""}`}>
+              <UserCog className="inline mr-1" size={16} /> Admin
+            </button>
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-rose-600 hover:bg-rose-700 text-white font-medium py-2 px-4 rounded-md flex justify-center items-center"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <span className="flex items-center">
-                <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Connexion en cours...
-              </span>
-            ) : (
-              <span className="flex items-center">
-                <LogIn size={18} className="mr-2" />
-                Se connecter
-              </span>
-            )}
+          <button disabled={isLoading} type="submit"
+            className="w-full bg-rose-600 hover:bg-rose-700 text-white py-2 rounded-md">
+            {isLoading ? "Connexion..." : "Se connecter"}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 dark:text-gray-400">
-            Pas encore de compte ?{" "}
-            <Link to="/register" className="text-rose-600 dark:text-rose-400 hover:underline">
-              S'inscrire
-            </Link>
-          </p>
-        </div>
+        <p className="mt-4 text-center text-gray-600">
+          Pas encore de compte ?{" "}
+          <Link to="/register" className="text-rose-600 hover:underline">S'inscrire</Link>
+        </p>
       </div>
     </div>
   );

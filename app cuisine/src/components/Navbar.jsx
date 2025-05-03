@@ -84,13 +84,15 @@ const Navbar = () => {
 
             {user ? (
               <>
-                <Link to="/add-recipe" className="nav-link">
-                  <PenTool size={18} className="inline mr-1" /> Add Recipe
-                </Link>
                 {isAdmin && (
-                  <Link to="/admin" className="nav-link text-red-500">
-                    Admin
-                  </Link>
+                  <>
+                    <Link to="/add-recipe" className="nav-link">
+                      <PenTool size={18} className="inline mr-1" /> Add Recipe
+                    </Link>
+                    <Link to="/admin" className="nav-link text-red-500">
+                      Admin
+                    </Link>
+                  </>
                 )}
                 <div className="relative group">
                   <button className="flex items-center nav-link">
@@ -168,11 +170,13 @@ const Navbar = () => {
 
             {user ? (
               <>
-                <Link to="/add-recipe" onClick={() => setIsOpen(false)}>
-                  <PenTool size={18} className="inline mr-1" /> Add Recipe
-                </Link>
                 {isAdmin && (
-                  <Link to="/admin" onClick={() => setIsOpen(false)} className="text-red-500">Admin</Link>
+                  <>
+                    <Link to="/add-recipe" onClick={() => setIsOpen(false)}>
+                      <PenTool size={18} className="inline mr-1" /> Add Recipe
+                    </Link>
+                    <Link to="/admin" onClick={() => setIsOpen(false)} className="text-red-500">Admin</Link>
+                  </>
                 )}
                 <Link to="/profile" onClick={() => setIsOpen(false)}>
                   <User size={18} className="inline mr-1" /> Profile

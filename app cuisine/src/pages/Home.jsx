@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getAllRecipes } from "../services/recipeService";
-import RecipeCard from "../components/RecipeCard";
 import { Loader } from "lucide-react";
 
 const HomePage = ({ user }) => {
@@ -17,8 +16,8 @@ const HomePage = ({ user }) => {
         setLoading(true);
         const data = await getAllRecipes();
         setRecipes(data);
-        setFilteredRecipes(data);
-        setCategories([...new Set(data.map((r) => r.category))]);
+        const uniqueCategories = [...new Set(data.map((r) => r.category).filter(Boolean))];
+        setCategories(uniqueCategories);
       } catch (error) {
         console.error("Erreur lors du chargement des recettes :", error);
       } finally {
@@ -31,11 +30,9 @@ const HomePage = ({ user }) => {
 
   useEffect(() => {
     let result = [...recipes];
-
     if (selectedCategory) {
       result = result.filter((r) => r.category === selectedCategory);
     }
-
     result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     setFilteredRecipes(result);
   }, [recipes, selectedCategory]);
@@ -54,7 +51,7 @@ const HomePage = ({ user }) => {
         <p className="text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto mb-8">
           Bienvenue sur 404.js Cuisine, l'endroit idéal pour découvrir et partager vos recettes de cuisine.
         </p>
-        {user && (
+        {user?.role === "admin" && (
           <Link to="/add-recipe" className="btn-primary text-lg px-8 py-3">
             Ajouter une recette
           </Link>
@@ -70,7 +67,7 @@ const HomePage = ({ user }) => {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="form-input"
+              className="border border-gray-300 dark:border-gray-600 rounded px-4 py-2 w-full md:w-auto bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             >
               <option value="">Toutes les catégories</option>
               {categories.map((cat) => (
@@ -107,7 +104,23 @@ const HomePage = ({ user }) => {
         ) : filteredRecipes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredRecipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
+              <div
+                key={recipe._id || recipe.id}
+                className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm space-y-2 hover:shadow-md transition duration-300"
+              >
+                <h3 className="text-xl font-bold text-orange-700 dark:text-orange-400">
+                  {recipe.title}
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300 line-clamp-3">
+                  {recipe.description}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Catégorie : {recipe.category}
+                </p>
+                <p className="text-xs text-gray-400">
+                  Ajoutée le : {new Date(recipe.createdAt).toLocaleDateString()}
+                </p>
+              </div>
             ))}
           </div>
         ) : (
@@ -122,7 +135,7 @@ const HomePage = ({ user }) => {
                 ? "Essayez de sélectionner une autre catégorie"
                 : "Ajoutez la première recette !"}
             </p>
-            {user && (
+            {user?.role === "admin" && (
               <div className="mt-4">
                 <Link to="/add-recipe" className="btn-primary">
                   Ajouter une recette
