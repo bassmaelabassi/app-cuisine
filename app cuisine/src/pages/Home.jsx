@@ -1,3 +1,4 @@
+// src/pages/Home.jsx
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
@@ -87,7 +88,7 @@ const Home = () => {
       <section>
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <Loader className="animate-spin h-8 w-8 text-orange-600 dark:text-orange-400" />
+            <div className="animate-spin h-8 w-8 text-orange-600 dark:text-orange-400" />
           </div>
         ) : filteredRecipes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
