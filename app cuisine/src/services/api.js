@@ -1,61 +1,70 @@
-const API_URL = process.env.REACT_APP_API_URL || "";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 export const getAllRecipes = async () => {
   try {
     const response = await fetch(`${API_URL}/recipes`);
-    if (!response.ok) {
-      throw new Error(`Error fetching recipes: ${response.statusText}`);
-    }
+    if (!response.ok) throw new Error("Error fetching recipes");
     return await response.json();
   } catch (error) {
     console.error("Error fetching recipes:", error);
-    throw new Error("Unable to fetch recipes.");
+    return [];
   }
 };
 
 export const getRecipeById = async (id) => {
   try {
     const response = await fetch(`${API_URL}/recipes/${id}`);
-    if (!response.ok) {
-      throw new Error(`Error fetching recipe by ID: ${response.statusText}`);
-    }
+    if (!response.ok) throw new Error("Error fetching recipe");
     return await response.json();
   } catch (error) {
     console.error("Error fetching recipe:", error);
-    throw new Error(`Unable to fetch recipe with ID ${id}`);
+    return null;
   }
 };
 
-export const createRecipe = async (recipeData) => {
+export const createRecipe = async (data) => {
   try {
-    const newRecipe = {
-      ...recipeData,
-      id: `recipe_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      likes: 0,
-      comments: [],
-    };
-    return newRecipe;
+    const response = await fetch(`${API_URL}/recipes`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error("Error creating recipe");
+    return await response.json();
   } catch (error) {
     console.error("Error creating recipe:", error);
-    throw new Error("Unable to create recipe.");
+    throw error;
   }
 };
 
-export const updateRecipe = async (id, recipeData) => {
+export const updateRecipe = async (id, data) => {
   try {
-    return { ...recipeData, id };
+    const response = await fetch(`${API_URL}/recipes/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error("Error updating recipe");
+    return await response.json();
   } catch (error) {
     console.error("Error updating recipe:", error);
-    throw new Error(`Unable to update recipe with ID ${id}`);
+    throw error;
   }
 };
 
 export const deleteRecipe = async (id) => {
   try {
+    const response = await fetch(`${API_URL}/recipes/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Error deleting recipe");
     return true;
   } catch (error) {
     console.error("Error deleting recipe:", error);
-    throw new Error(`Unable to delete recipe with ID ${id}`);
+    throw error;
   }
 };

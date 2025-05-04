@@ -1,32 +1,40 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getAllRecipes } from "../services/recipeService";
+import { getAllRecipes, deleteRecipe } from "../services/api";
 import { Loader } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
-const HomePage = ({ user }) => {
+const Home = () => {
+  const { user } = useAuth();
   const [recipes, setRecipes] = useState([]);
   const [filteredRecipes, setFilteredRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [categories, setCategories] = useState([]);
 
+  // قراءة الوصفات من localStorage عند تحميل الصفحة
   useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        setLoading(true);
-        const data = await getAllRecipes();
-        setRecipes(data);
-        const uniqueCategories = [...new Set(data.map((r) => r.category).filter(Boolean))];
-        setCategories(uniqueCategories);
-      } catch (error) {
-        console.error("Erreur lors du chargement des recettes :", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRecipes();
+    const storedRecipes = JSON.parse(localStorage.getItem("recipes"));
+    if (storedRecipes) {
+      setRecipes(storedRecipes);
+      setLoading(false);  // عندما يتم تحميل الوصفات من localStorage، نوقف التحميل
+    } else {
+      fetchRecipes(); // إذا لم توجد بيانات في localStorage، نبدأ في تحميلها من API
+    }
   }, []);
+
+  const fetchRecipes = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllRecipes();
+      setRecipes(data);
+      // حفظ الوصفات في localStorage بعد تحميلها
+      localStorage.setItem("recipes", JSON.stringify(data));
+    } catch (error) {
+      console.error("Erreur lors du chargement des recettes :", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     let result = [...recipes];
@@ -41,9 +49,21 @@ const HomePage = ({ user }) => {
     setSelectedCategory("");
   };
 
+  const handleDeleteRecipe = async (id) => {
+    if (!window.confirm("Confirmer la suppression ?")) return;
+    try {
+      await deleteRecipe(id);
+      // حذف الوصفة من الواجهة و localStorage
+      const updatedRecipes = recipes.filter((r) => r._id !== id);
+      setRecipes(updatedRecipes);
+      localStorage.setItem("recipes", JSON.stringify(updatedRecipes));
+    } catch (err) {
+      console.error("Erreur suppression:", err);
+    }
+  };
+
   return (
     <div className="space-y-8">
-      {/* HERO SECTION */}
       <section className="text-center py-12 px-4 rounded-2xl bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30">
         <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-yellow-600 dark:from-orange-400 dark:to-yellow-400">
           Partagez vos recettes préférées
@@ -58,23 +78,22 @@ const HomePage = ({ user }) => {
         )}
       </section>
 
-      {/* CATEGORY FILTER */}
       <section className="space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <h2 className="text-2xl md:text-3xl font-bold">Recettes récentes</h2>
 
-          <div className="w-full md:w-auto">
+          <div className="w-full md:w-auto md:ml-auto">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 rounded px-4 py-2 w-full md:w-auto bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
+              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100"
             >
               <option value="">Toutes les catégories</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
+              <option value="Maroc">Maroc</option>
+              <option value="Italie">Italie</option>
+              <option value="Espagne">Espagne</option>
+              <option value="Allemagne">Allemagne</option>
+              <option value="Asie">Asie</option>
             </select>
           </div>
         </div>
@@ -95,7 +114,6 @@ const HomePage = ({ user }) => {
         )}
       </section>
 
-      {/* RECIPES DISPLAY */}
       <section>
         {loading ? (
           <div className="flex justify-center items-center py-20">
@@ -115,11 +133,25 @@ const HomePage = ({ user }) => {
                   {recipe.description}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Catégorie : {recipe.category}
+                  Catégorie : {recipe.category || "Non catégorisé"}
                 </p>
                 <p className="text-xs text-gray-400">
                   Ajoutée le : {new Date(recipe.createdAt).toLocaleDateString()}
                 </p>
+
+                {user?.role === "admin" && (
+                  <div className="flex space-x-2 mt-4">
+                    <Link to={`/edit-recipe/${recipe._id || recipe.id}`} className="text-blue-600 dark:text-blue-400">
+                      Modifier
+                    </Link>
+                    <button
+                      onClick={() => handleDeleteRecipe(recipe._id || recipe.id)}
+                      className="text-red-600 dark:text-red-400"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -149,4 +181,4 @@ const HomePage = ({ user }) => {
   );
 };
 
-export default HomePage;
+export default Home;
