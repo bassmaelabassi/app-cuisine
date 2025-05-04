@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getAllRecipes, deleteRecipe } from "../services/api";
-import { Loader } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 
 const Home = () => {
@@ -12,28 +10,14 @@ const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
 
   useEffect(() => {
-    const storedRecipes = JSON.parse(localStorage.getItem("recipes"));
-    if (storedRecipes) {
+    const fetchRecipes = () => {
+      const storedRecipes = JSON.parse(localStorage.getItem("recipes")) || [];
       setRecipes(storedRecipes);
       setLoading(false);
-    } else {
-      fetchRecipes();
-    }
-  }, []);
+    };
 
-  const fetchRecipes = async () => {
-    try {
-      setLoading(true);
-      const data = await getAllRecipes();
-      setRecipes(data);
-      
-      localStorage.setItem("recipes", JSON.stringify(data));
-    } catch (error) {
-      console.error("Erreur lors du chargement des recettes :", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchRecipes();
+  }, []);
 
   useEffect(() => {
     let result = [...recipes];
@@ -46,18 +30,6 @@ const Home = () => {
 
   const clearFilters = () => {
     setSelectedCategory("");
-  };
-
-  const handleDeleteRecipe = async (id) => {
-    if (!window.confirm("Confirmer la suppression ?")) return;
-    try {
-      await deleteRecipe(id);
-      const updatedRecipes = recipes.filter((r) => r._id !== id);
-      setRecipes(updatedRecipes);
-      localStorage.setItem("recipes", JSON.stringify(updatedRecipes));
-    } catch (err) {
-      console.error("Erreur suppression:", err);
-    }
   };
 
   return (
@@ -121,7 +93,7 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredRecipes.map((recipe) => (
               <div
-                key={recipe._id || recipe.id}
+                key={recipe.id}
                 className="border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm space-y-2 hover:shadow-md transition duration-300"
               >
                 <h3 className="text-xl font-bold text-orange-700 dark:text-orange-400">
@@ -139,15 +111,9 @@ const Home = () => {
 
                 {user?.role === "admin" && (
                   <div className="flex space-x-2 mt-4">
-                    <Link to={`/edit-recipe/${recipe._id || recipe.id}`} className="text-blue-600 dark:text-blue-400">
-                      Modifier
+                    <Link to={`/recipe-details/${recipe.id}`} className="text-blue-600 dark:text-blue-400">
+                      Voir plus
                     </Link>
-                    <button
-                      onClick={() => handleDeleteRecipe(recipe._id || recipe.id)}
-                      className="text-red-600 dark:text-red-400"
-                    >
-                      Supprimer
-                    </button>
                   </div>
                 )}
               </div>
@@ -163,7 +129,7 @@ const Home = () => {
             <p className="mt-2 text-gray-500 dark:text-gray-500">
               {recipes.length > 0
                 ? "Essayez de sélectionner une autre catégorie"
-                : "Ajoutez la première recette !"}
+                : "Ajoutez la première recette !" }
             </p>
             {user?.role === "admin" && (
               <div className="mt-4">

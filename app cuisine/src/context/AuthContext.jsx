@@ -1,6 +1,4 @@
 import { createContext, useContext, useState } from "react";
-
-// Export the context so components can import it directly if needed
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
