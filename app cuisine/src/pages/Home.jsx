@@ -11,14 +11,13 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("");
 
-  // قراءة الوصفات من localStorage عند تحميل الصفحة
   useEffect(() => {
     const storedRecipes = JSON.parse(localStorage.getItem("recipes"));
     if (storedRecipes) {
       setRecipes(storedRecipes);
-      setLoading(false);  // عندما يتم تحميل الوصفات من localStorage، نوقف التحميل
+      setLoading(false);
     } else {
-      fetchRecipes(); // إذا لم توجد بيانات في localStorage، نبدأ في تحميلها من API
+      fetchRecipes();
     }
   }, []);
 
@@ -27,7 +26,7 @@ const Home = () => {
       setLoading(true);
       const data = await getAllRecipes();
       setRecipes(data);
-      // حفظ الوصفات في localStorage بعد تحميلها
+      
       localStorage.setItem("recipes", JSON.stringify(data));
     } catch (error) {
       console.error("Erreur lors du chargement des recettes :", error);
@@ -53,7 +52,6 @@ const Home = () => {
     if (!window.confirm("Confirmer la suppression ?")) return;
     try {
       await deleteRecipe(id);
-      // حذف الوصفة من الواجهة و localStorage
       const updatedRecipes = recipes.filter((r) => r._id !== id);
       setRecipes(updatedRecipes);
       localStorage.setItem("recipes", JSON.stringify(updatedRecipes));

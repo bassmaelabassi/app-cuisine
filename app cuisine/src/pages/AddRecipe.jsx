@@ -28,7 +28,6 @@ const AddRecipe = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
 
-  // Récupérer la recette si on modifie
   useEffect(() => {
     if (id) {
       setIsEditing(true);
