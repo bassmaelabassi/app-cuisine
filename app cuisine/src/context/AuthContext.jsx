@@ -1,11 +1,10 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState({
-    role: "admin" // يمكنك تغيير هذه القيمة أو جعلها null للبداية
+    role: "admin"
   });
 
   return (
